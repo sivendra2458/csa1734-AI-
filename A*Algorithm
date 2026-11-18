@@ -1,0 +1,64 @@
+
+import heapq
+
+# Graph with edge costs
+graph = {
+    'A': [('B', 1), ('C', 4)],
+    'B': [('D', 2)],
+    'C': [('D', 1)],
+    'D': [('G', 3)],
+    'G': []
+}
+
+# Heuristic values: estimated distance to goal G
+h = {
+    'A': 5,
+    'B': 4,
+    'C': 2,
+    'D': 3,
+    'G': 0
+}
+
+def astar(start, goal):
+    # Priority queue: (f value, node)
+    pq = [(h[start], start)]
+
+    # Actual cost from start
+    g_cost = {start: 0}
+
+    # Store previous nodes
+    parent = {start: None}
+
+    while pq:
+        f, current = heapq.heappop(pq)
+
+        if current == goal:
+            path = []
+
+            while current is not None:
+                path.append(current)
+                current = parent[current]
+
+            path.reverse()
+            return path, g_cost[goal]
+
+        for neighbor, cost in graph[current]:
+            new_cost = g_cost[current] + cost
+
+            if new_cost < g_cost.get(neighbor, float('inf')):
+                g_cost[neighbor] = new_cost
+                parent[neighbor] = current
+
+                f_cost = new_cost + h[neighbor]
+                heapq.heappush(pq, (f_cost, neighbor))
+
+    return None, float('inf')
+
+# Run the algorithm
+path, cost = astar('A', 'G')
+
+if path:
+    print("Shortest Path:", " -> ".join(path))
+    print("Total Cost:", cost)
+else:
+    print("No path found.")
