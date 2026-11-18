@@ -1,0 +1,72 @@
+
+from collections import deque
+
+# State: (missionaries_left, cannibals_left, boat_side)
+# Boat side: 0 = left, 1 = right
+
+def is_valid(m, c):
+    if m < 0 or c < 0 or m > 3 or c > 3:
+        return False
+
+    # Missionaries must not be outnumbered
+    # on either bank when they are present
+    if m > 0 and m < c:
+        return False
+
+    mr = 3 - m
+    cr = 3 - c
+
+    if mr > 0 and mr < cr:
+        return False
+
+    return True
+
+
+def solve():
+    start = (3, 3, 0)
+    goal = (0, 0, 1)
+
+    # Possible boat combinations (M, C)
+    moves = [(1, 0), (2, 0), (0, 1),
+             (0, 2), (1, 1)]
+
+    queue = deque([start])
+    parent = {start: None}
+
+    while queue:
+        state = queue.popleft()
+        m, c, boat = state
+
+        if state == goal:
+            path = []
+
+            while state is not None:
+                path.append(state)
+                state = parent[state]
+
+            path.reverse()
+
+            print("Solution found:")
+            for step, (m, c, b) in enumerate(path):
+                side = "Left" if b == 0 else "Right"
+                print("Step", step, ":",
+                      "Missionaries left =", m,
+                      ", Cannibals left =", c,
+                      ", Boat =", side)
+            return
+
+        for dm, dc in moves:
+            if boat == 0:
+                new_state = (m - dm, c - dc, 1)
+            else:
+                new_state = (m + dm, c + dc, 0)
+
+            if is_valid(new_state[0], new_state[1]):
+                if new_state not in parent:
+                    parent[new_state] = (m, c, boat)
+                    queue.append(new_state)
+
+    print("No solution found.")
+
+
+solve()
